@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique } from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { UserModelClass } from 'src/models-classes/user.class';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Unique,
+  OneToMany,
+} from 'typeorm';
+import { CourseUserEntity } from './course-user.entity';
 
 @Entity({
   name: 'course',
@@ -9,7 +16,12 @@ export class CourseEntity {
   id: number;
 
   @Column({
-    unique: true
+    unique: true,
   })
   name: string;
+
+  @OneToMany(() => CourseUserEntity, (courseUser) => courseUser.course)
+  coursesUsers: CourseUserEntity[];
+
+  users: UserModelClass[]
 }

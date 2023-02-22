@@ -1,19 +1,25 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   ClientProxyFactory,
   ClientsModule,
   Transport,
 } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CourseModule } from 'src/courses/course.module';
+import { CourseUserEntity } from 'src/entities/course-user.entity';
 import { CourseEntity } from 'src/entities/course.entity';
-import { CourseController } from './infrastructure/course.controller';
-import { CourseService } from './infrastructure/course.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CourseUserController } from './infrastructure/course-user.controller';
+import { CourseUserService } from './infrastructure/course-user.service';
 
 @Module({
-  imports: [ConfigModule, TypeOrmModule.forFeature([CourseEntity])],
+  imports: [
+    ConfigModule,
+    TypeOrmModule.forFeature([CourseUserEntity]),
+    CourseModule,
+  ],
   providers: [
-    CourseService,
+    CourseUserService,
     {
       provide: 'USER_SERVICE',
       useFactory: (configService: ConfigService) => {
@@ -34,6 +40,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     },
   ],
   exports: [TypeOrmModule],
-  controllers: [CourseController],
+  controllers: [CourseUserController],
 })
-export class CourseModule {}
+export class CourseUserModule {}

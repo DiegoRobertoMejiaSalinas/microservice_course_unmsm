@@ -21,6 +21,9 @@ async function bootstrap() {
       queueOptions: {
         durable: false,
       },
+      socketOptions: {
+        heartbeatIntervalInSeconds: 60,
+      }
     },
   });
 

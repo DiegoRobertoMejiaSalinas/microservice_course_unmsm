@@ -1,10 +1,15 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
+  OnModuleInit,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
+import { lastValueFrom, Observer } from 'rxjs';
 import { CourseEntity } from 'src/entities/course.entity';
+import { In } from 'typeorm';
 import { CreateCourseDto } from '../domain/dto/create-course.dto';
 import { UpdateCourseDto } from '../domain/dto/update-course.dto';
 import { CourseRepository } from './repositories/course.repository';
@@ -14,18 +19,47 @@ export class CourseService {
   constructor(
     @InjectRepository(CourseEntity)
     private readonly _courseRepository: CourseRepository,
-  ) {}
+    @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
+  ) {
+    this.userClient.connect();
+  }
 
   async listAllCourses() {
     return await this._courseRepository.find();
   }
 
+  async getCoursesByUserId(userId: number) {
+    return await this._courseRepository.find({
+      where: {
+        coursesUsers: {
+          userId,
+        },
+      },
+    });
+  }
+
   async findCourseById(courseId: number) {
-    return await this._courseRepository.findOne({
+    const foundCourse = await this._courseRepository.findOne({
+      relations: {
+        coursesUsers: true,
+      },
       where: {
         id: courseId,
       },
     });
+
+    if (!foundCourse) return null;
+
+    const enrolledUsers = await lastValueFrom(
+      this.userClient.send(
+        'users_by_array_id',
+        foundCourse.coursesUsers.map((t) => t.userId),
+      ),
+    );
+
+    foundCourse.users = enrolledUsers || [];
+
+    return foundCourse;
   }
 
   async createCourse(body: CreateCourseDto) {
