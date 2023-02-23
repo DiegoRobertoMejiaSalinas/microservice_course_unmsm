@@ -7,7 +7,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateEnrollmentDto } from '../domain/dto/create-enrollment.dto';
 import { CourseUserService } from './course-user.service';
@@ -31,5 +31,10 @@ export class CourseUserController implements OnApplicationShutdown {
   @Delete(':id')
   async deleteEnrollment(@Param('id') enrollmentId: number) {
     return await this.courseUserService.deleteEnrollment(enrollmentId);
+  }
+
+  @MessagePattern('delete_enrolled_user_by_id')
+  async deleteEnrolledCoursesByUserId(@Payload() userId: number){
+    return await this.courseUserService.deletedEnrolledCoursesByUserId(userId)
   }
 }

@@ -34,6 +34,28 @@ export class CourseUserService {
 
   getEnrollmentById() {}
 
+  async deletedEnrolledCoursesByUserId(userId: number) {
+    try {
+      await this._enrollmentRepository.delete({
+        userId,
+      });
+
+      return {
+        success: true,
+        message: 'Matriculas retiradas del usuario',
+      };
+    } catch (e) {
+      if (e?.response?.error?.type) throw e;
+
+      throw new InternalServerErrorException({
+        error: {
+          type: 'error_deleting_enrolled_courses',
+          message: 'Ocurrio un error el eliminar las matriculas',
+        },
+      });
+    }
+  }
+
   async createEnrollment(body: CreateEnrollmentDto) {
     try {
       /*

@@ -31,7 +31,7 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
 
-  await app.listen(3001, () => {
+  await app.listen(3000, () => {
     logger.log('Course Service Server is listening on 3000');
   });
 }
